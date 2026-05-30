@@ -49,12 +49,18 @@ Se:
 | 3h – 6h                            | 🟡 Médio |
 | < 3h                               | 🟢 Baixo |
 
+>Os limiares de 3 e 6 horas foram definidos com base nos estudos de Foroud et al. (2018), que demonstraram que apenas 2 horas de molhamento foliar podem ser suficientes para infecção em condições ótimas, e de Smith et al. (2021), que indicam 5 a 7 horas como referência para infecção em condições subtropicais. O limiar inferior de 3 horas oferece margem preventiva, enquanto o limiar superior de 6 horas sinaliza risco iminente de infecção estabelecida.
+
 ---
 
 ### 1.3 Janela temporal
+
+As métricas centrais do modelo são o maior bloco contínuo de horas em condição crítica nas últimas 24 horas e o intervalo de varredura a cada 30 minutos. A escolha das 24 horas captura a essência epidemiológica do míldio de que não basta que UR e temperatura atinjam os limiares pontualmente, é a duração sustentada dessas condições que determina se a infecção terá tempo de se estabelecer [Foroud et al., 2018; Smith et al., 2021]. E a adoção do intervalo de 30 minutos representa o equilíbrio entre a resolução temporal, ou seja, o quão detalhadamente o sistema acompanha as mudanças ao longo do tempo, o consumo de energia, o processamento de dados e tempo de operação do robô para acompanhar e capturar as mudanças dos limiares epidemiológicos que favorecem o desenvolvimento da doença.
+
 - A análise é baseada nas últimas 24 horas (`df[col_ts].max() - pd.Timedelta(hours=24)`)
 - Cálculo executado a cada 30 minutos (`intervalo_min = 30`)
 
+> O sensor SHT31 realizará leituras a cada varredura salvando a média, os máximos de UR e o tempo contínuo crítico como processamento; ao final o robô envia ao banco via HTTP. A duração é calculada pela diferença real entre timestamps consecutivos, garantindo robustez a leituras irregulares sem necessidade de interpolação.
 ---
 
 ### 1.4 Estrutura dos dados
@@ -219,15 +225,15 @@ ESP32 → envia dados → Supabase (tabela temporal)
                          ↓
               ┌── Risco ALTO? ──┐
               Não               Sim
-              ↓                 ↓
-         Aguarda        Robô fotografa a planta
-                               ↓
-                    Modelo CNN classifica
-                    (Healthy / Downey Mildew)
-                               ↓
-                 Salva resultado / dashboard
-                               ↓
-                  Aciona tratamento com Luz UV-C
+              ↓                  ↓
+           Aguarda        Robô fotografa a planta
+                                 ↓
+                        Modelo CNN classifica
+                        (Healthy / Downey Mildew)
+                                 ↓
+                        Salva resultado / dashboard
+                                 ↓
+                        Aciona tratamento com Luz UV-C
 ```
 
 ## 4. Fluxo de funcionamento
@@ -323,13 +329,15 @@ Doenças com potencial de inclusão futura:
 
 ## 7. Referências
 
-AARROUF, J.; URBAN, L. Flashes of UV-C light: an innovative method for stimulating plant defences. **PLoS ONE**, v. 15, n. 7, e0235918, 2020.
+AARROUF, J.; URBAN, L. **Flashes of UV-C light: an innovative method for stimulating plant defences**. PLoS ONE, v. 15, n. 7, e0235918, 2020.
 
 COSTA, H.; VENTURA, J. A.; LIMA, I. M. Doenças da alface no estado do Espírito Santo: diagnose e manejo. In: COSTA, H. (Ed.). **Cultura da alface**: aspectos fitossanitários. Vitória: Incaper, 2012. cap. 6, p. 71–92.
 
 COSTA, H.; ZAMBOLIM, L.; VENTURA, J. A. Doenças de hortaliças que se constituem em desafios para o controle. In: ZAMBOLIM, L. et al. (Eds.). **Manejo Integrado de Doenças e Pragas: hortaliças**. Visconde do Rio Branco: Suprema, 2007. p. 319–348.
 
-DENG, J. et al. ImageNet: a large-scale hierarchical image database. In: IEEE CONFERENCE ON COMPUTER VISION AND PATTERN RECOGNITION, 2009, Miami. **Proceedings** [...]. New York: IEEE, 2009. p. 248–255.
+DENG, J. et al. **ImageNet: a large-scale hierarchical image database**. In: IEEE CONFERENCE ON COMPUTER VISION AND PATTERN RECOGNITION, 2009, Miami. Proceedings [...]. New York: IEEE, 2009. p. 248–255.
+
+FOROUD, N. A. et al. **Infection conditions for downy mildew of lettuce caused by Bremia lactucae**. Canadian Journal of Plant Pathology, v. 40, n. 3, p. 376–386, 2018.
 
 GÉRON, A. **Mãos à obra: aprendizado de máquina com Scikit-Learn, Keras e TensorFlow**. 3. ed. Rio de Janeiro: Alta Books, 2025.
 
@@ -346,6 +354,8 @@ ONOFRE, R. B. et al. Nighttime application of UV-C light to control cucurbit pow
 PEDREGOSA, F. et al. Scikit-learn: machine learning in Python. **Journal of Machine Learning Research**, v. 12, p. 2825–2830, 2011.
 
 SIDIBÉ, A. et al. Preharvest UV-C hormesis induces key genes associated with homeostasis, growth and defense in lettuce. **Frontiers in Plant Science**, v. 13, 2022.
+
+SMITH, I. M. et al. **Bremia lactucae**. In: CABI COMPENDIUM. Wallingford: CABI, 2021.Disponível em: https://www.cabidigitallibrary.org/doi/10.1079/cabicompendium.10696. Acesso em: mai. 2025.
 
 SUTHAPARAN, A. et al. Specific alteration of plant-pathogen interactions by UV-B radiation: inactivation of powdery mildew infections by low doses of UV-B. **Journal of Photochemistry and Photobiology B: Biology**, v. 114, p. 10–19, 2012.
 
